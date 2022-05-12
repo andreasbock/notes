@@ -1,0 +1,124 @@
+\chapter{Numerical Optimisation}
+\localtableofcontents
+
+\section{Interior Point Methods}
+
+\section{Trust Region Method}
+
+A trust region is the subset of the region of the objective function that
+is approximated using a model function e.g. a quadratic function.
+
+
+\section{Newton Method}
+
+Suppose we want to solve:
+\[
+\min_x f(x).
+\]
+for $x\mathcal{R}^n$. Newton's method uses the Taylor expansion:
+\[
+f(x+\delta x) \approx f(x) + f'(x)\delta x + \half\delta x\transp H\delta x,
+\]
+to find the optimal step:
+\begin{equation}\label{eq:newton_step}
+\delta x^* = - H\inv f'(x).
+\end{equation}
+
+\section{Gauss-Newton}
+
+When we solve a \emph{least-squares} optimisation problem on the form:
+\[
+\min_x = \sum_i f_i^2(x_i),
+\]
+the Hessian  is given by:
+\[
+H := \sum_i \nabla f_i \nabla f_j\transp  + f_i \Delta f_j.
+\]
+A Gauss-Newton step uses the following approximation:
+\[
+H_{GN} := \sum_i \nabla f_i \nabla f_j\transp,
+\]
+resulting in the following update step:
+\begin{equation}\label{eq:newton_step:gauss-newton}
+\delta x^* = - H_{GN}\inv \sum_i \nabla f_i(x).
+\end{equation}
+
+\section{Levenberg-Marquardt}
+
+Uses the following Newton step rather than \eqref{eq:newton_step:gauss-newton}:
+\begin{equation}\label{eq:newton_step:lm}
+\delta x^* = - (H_{GN} + \lambda I)\inv \nabla f(x),
+\end{equation}
+for some $\lambda>0$, where $H_{GN}$ is the Gauss-Newton Hessian approximation.
+
+\section{Quasi-Newton}
+
+\section{Broyden–Fletcher–Goldfarb–Shanno}
+
+\section{Robust Optimisation}
+
+\subsection{Distributionally Robust Optimisation}
+
+\section{Stochastic Gradient Descent}
+
+We consider a problem on the form:
+\[  
+\min_x \frac1n \sum_i f_i(x).
+\]
+Usually each $f_i$ corresponds to some operation on the $i$th part of
+a data set. Standard gradient descent leads to steps on the form:
+\[
+x^{k+1} = x^k - \frac1n \sum_i \nabla f_i (x^k).
+\]
+The \emph{stochastic} gradient descent simply performs the update on a
+\emph{per training sample} basis:
+\[
+x^{k+1} = x^k - \nabla f_i (x^k),
+\]
+for all $i$. A compromise between this and the true gradient is the
+so-called \emph{mini-batch strategy}:
+
+\[
+x^{k+1} = x^k - \frac{1}{|\sigma|}\sum_{\sigma}\nabla f_i (x^k),
+\]
+where $\sigma$ is a subset of the training samples.
+
+\section{ADMM}
+
+Consider:
+\begin{align}
+& \min_{x,y} f(x) + g(z)\\
+& s.t.\quad Ax + Bz = b.
+\end{align}
+
+The augmented Langrangian reads:
+\[
+L_\rho(x,z,y) =  f(x) + g(z) + y\transp (Ax + Bz - b) + \rho/2\|Ax + Bz - b\|.
+\]
+ADMM solves this by iterating:
+\begin{align}
+& x^{k+1} = \arg\min_x L_\rho (x, z^k, y^k),\\
+& z^{k+1} = \arg\min_z L_\rho (x^k, z, y^k),\\
+& y^{k+1} = y^k + \rho(Ax^{k+1} + Bz^{k+1} - b).
+\end{align}
+
+\emph{Dual descent on the augmented Lagrangian is called the
+method of multipliers!}
+
+
+Inexact ADMM solves the subproblems using CG. Converges when the
+error is summable, whatever that means. However, not great when
+the condition number is awful. Inspired by linearised ADMM, the
+sub (optimisation) problem for the $x$ iterate replaced by a second
+order Taylor expansion. They then solve for its stationary point.
+
+NysADMM preconditions the CG method applied to the system above
+with a randomly sketched Nystrom approximation of the Hessian.
+
+\section{Scalable Optimisation Methods}
+
+
+\section{PDE-constrained Optimisation}
+
+
+\subsection{Mesh-dependence}

@@ -1,0 +1,15 @@
+\section{4D Var}
+
+\textbf{Variational:} means...\\
+
+Kalman filters work well but they have a characteristic defect
+in that, unlike 4DVar, they leave behind discontinuous model
+trajectories that do not correspond to physically consistent and
+continuous model states.
+
+Assimilation is largely on the following form:\\
+\[
+J(x_a) = (x_a-x_f)\transp B\inv (x_a - x_f) + (H(x_a)- y)\transp R\inv (H(x_a)-y).
+\]
+
+Satellite radiances

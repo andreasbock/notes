@@ -1,0 +1,171 @@
+\section{The Ensemble Kalman Filter}
+
+The EnKF is a Monte Carlo data assimilation \cite{reich2015probabilistic} algorithm dating back to 1994 \cite{evensen1994sequential} of the Kalman filter. An excellent introduction to the EnKF can be found in \cite{katzfuss2016understanding}. Its main motivation is to circumvent one of
+the main drawbacks of the Kalman filter when $n$ is large. We refer to \cite{roth2017ensemble} for a signal processing perspective on the EnKF. Indeed, the Kalman filter propagates the
+forecast covariance over its iterations, so the size of $\Pkpk$ obviously scales quadratically in
+$n$. This is prohibitive, so instead of propagating our mean and covariance through the filter, we 
+keep track of $N_E$ different states of the system and propagate them and \emph{then} compute their 
+sample covariances. That is, instead
+\mymarginnote{Right, so $N_E<<n$? I'm sure that doesn't cause any issues...}
+of computing with an $n$-dimensional estimate and its $n\times n$ covariance matrix, we instead
+keep track of $N_E$ different state vectors of size $n$, and via the state equation, estimate a 
+covariance matrix based on this. In the Kalman filter, you advance the \emph{whole} covariance
+forward as the steps progress cf. equation \eqref{eq:covariance:I-KHP}. We simply estimate it in the
+EnKF using $N_E$ state vectors (resulting in total storage of $N_E \times n$), and while the he 
+resulting  covariance matrix will also have dimension $n\times n$ \emph{but we never explicitly
+compute it}!\\
+
+Mathematically, the EnKF instead computes at each step $k$ sample statistics from a collection, or
+\emph{ensemble}, $\hatXkk = \{\hatXkk^i\}_{i=1}^{N_E}$, of $N_E$ state vectors taking values in
+$\mathcal{X}$ equipped with an inner product $\langle\cdot, \cdot\rangle_\mathcal{X}$.
+We consider the following prior forecast, for iterations $k\geq 1$ and ensemble members
+$i=1,\ldots,N_E$:
+\begin{align}\label{eq:enkf_forecasting}
+& \hatXkpk^i = F_{k+1} \hatXkk^i  + w_{k+1}^i, & w_{k+1}^i\sim \mathcal{N}(0, Q_k).
+%& Y_k^i = H_k \Xk + v_k^i, & v_k^i \sim \mathcal{N}(0, R_k),
+\end{align}
+
+\begin{remark}
+\eqref{eq:enkf_forecasting} is called \emph{stochastic} EnKF due to the added noise.\\
+\end{remark}
+
+For such a forecast ensemble we compute the \emph{sample mean forecast} $\barXkpk$ and write the action of the \emph{sample forecast covariance error} $\ePkpk$:
+\begin{align}
+& \barXkpk := \frac{1}{N_E}\sum_{i=1}^{N_E} \hatXkpk^i,\label{enkf_approximations:X}\\
+& \ePkpk[\cdot] := \frac{1}{N_E-1}\sum_{i=1}^{N_E} (\Xkpk^i-\bar{X}_k)\langle \hatXkpk^i-\bar{X}_k,\cdot\rangle_\mathcal{X}\label{enkf_approximations:COV}.
+\end{align}
+Using the EnKF approximations \eqref{enkf_approximations:X} and \eqref{enkf_approximations:COV}
+we write the \emph{ensemble} Kalman gain and ensemble update as follows:
+\begin{subequations}\label{eq:naive_enkf_update}
+\begin{align}
+& K_{k+1}^E = \ePkpk H_{k+1}\transp\big[ H_{k+1}\ePkpk H_{k+1}\transp + R_{k+1}\big]\inv,\label{eq:kalman_update}\\
+& \hatXkpkp^i = \hatXkpk^i + K_{k+1}^E (\ykp - H_{k+1} \hatXkpk^i),\qquad i=1,\ldots,N_E.\label{eq:ensemble_update}
+\end{align}
+\end{subequations}
+where the latter can be compute when a new observation $\ykp$ is available. Note that 
+\eqref{eq:ensemble_update} parallelizes across the ensemble members. The trade-off here is that we
+must evolve a system of equations.\\
+
+\begin{remark}[Nonlinearity]
+The EnKF is used across many fields for highly nonlinear systems (i.e. $F$ and $H$ are generic operators),
+breaking with the original assumptions of the Kalman filter. Despite this, the success of the EnKF can be boiled down the the following quote:\\
+
+\textit{"It is an embodiment of the principle that an approximate solution to the right
+problem is worth more than a precise solution to the wrong
+problem."} \cite{katzfuss2016understanding}.\\
+
+The EnKF update is in fact also a nonlinear system owing to the dependence of the Kalman gain on the ensemble itself via the sample statistics, breaking with the Gaussian assumption of the ensemble. In the limit of large ensembles the EnKF can be shown to converge to the Kalman filter \cite{le2009large,mandel2011convergence}.
+\end{remark}
+
+\begin{remark}[Choice of initial ensemble]
+Here, $X_0$ is the initial ensemble.
+\end{remark}
+
+\subsection{Complexity Analysis}
+As it stands, \eqref{eq:naive_enkf_update} can be improved because a Cholesky factorisation of order
+$O(m^3)$ is needed to compute the inverse in \eqref{eq:kalman_update}. We can reduce this by some linear
+algebra. Writing \eqref{enkf_approximations:COV} in matrix form:
+\[
+\ePkpk = \frac{1}{N_E-1} X^E_{k+1|k} (X^E_{k+1|k})\transp,
+\]
+where $X^E_{k+1|k} = \Xkpk - \barXkpk$ and expanding this expression in \eqref{eq:kalman_update}:
+\begin{align*}
+\hatXkpkp^i & = \hatXkpk^i + K_{k+1}^E (\ykp - H_{k+1} \hatXkpk^i),\\
+& = \hatXkpk^i + \ePkpk H_{k+1}\transp\big[H_{k+1}\ePkpk H_{k+1}\transp + R_{k+1}\big]\inv (\ykp - H_{k+1} \hatXkpk^i),\\
+& = \hatXkpk^i + \frac{1}{N_E-1}X^E_{k+1|k} (X^E_{k+1|k})\transp H_{k+1}\transp\\
+& \qquad\quad \big[H_{k+1}\frac{1}{N_E-1}X^E_{k+1|k} (X^E_{k+1|k})\transp H_{k+1}\transp + R_{k+1}\big]\inv (\ykp - H_{k+1} \hatXkpk^i),\\
+& = \hatXkpk^i + \frac{1}{N_E-1}X^E_{k+1|k} A\transp \big[\frac{1}{N_E-1}A A\transp + R_{k+1}\big]\inv (\ykp - H_{k+1} \hatXkpk^i),
+\end{align*}
+where $A = H_{k+1}X^E_{k+1|k}$. Applying the SWM identity to the inverse gives us
+\[
+\big[\frac{1}{N_E-1}A A\transp + R_{k+1}\big]\inv =
+R_{k+1}\inv - \frac{1}{N_E-1} R_{k+1}\inv  A\big[I + \frac{1}{N_E-1}A\transp R_{k+1}\inv  A\big]\inv A\transp R_{k+1}\inv.
+\]
+Following \cite{mandel2006efficient}, we can therefore assemble $\hatXkpkp$ as:
+\begin{subequations}\label{eq:efficient_update}
+\begin{align}
+\hatXkpkp^i & = \hatXkpk^i + \frac{1}{N_E-1}X^E_{k+1|k} Z, & O(nN_E^2)\label{eq:efficient_update:1}\\
+Z & = A\transp L, & O(m N_E^2)\label{eq:efficient_update:2}\\
+L & = R_{k+1}\inv - \frac{1}{N_E-1} R_{k+1}\inv A W, & O(m N_E^2)\label{eq:efficient_update:3}\\
+W & = S\inv Z', & O(N_E^3) \label{eq:efficient_update:4}\\
+S & = I + \frac{1}{N_E-1}A\transp R_{k+1}\inv A & \label{eq:efficient_update:5}\\
+Z' & = A\transp R_{k+1}\inv (\ykp - H_{k+1} \hatXkpk^i), & O(m N_E^2)\label{eq:efficient_update:6}\\
+A & = H_{k+1} X^E_{k+1|k}. & O(m N_E)\label{eq:efficient_update:7}
+\end{align}
+\end{subequations}
+Consequently, the total complexity of \eqref{eq:efficient_update} is $O(N_E^2 (m + n)
++ N_E^3)$. Note that it is assumed in \eqref{eq:efficient_update:7} that an evaluation
+$h(x)$ of the observation operator is $O(m)$ (so it's not a full $O(mn N_E)$ operation
+to compute $A$).
+
+\mymarginnote{This might be a good exam question!}
+
+%EnKF is also robust to nonlinear systems (be it $H$, $M$ or both). It is a consequence
+%of \emph{linear Bayesian estimation}, where...
+%\todo{This}
+%\todo{Mention that enkf also reduces ensemble spread via: \tcite{sakov2008deterministic}!}
+
+\begin{remark}[Literature \& Perspective]
+\end{remark}
+
+\subsection{Effect of Monte Carlo Approximation}
+
+\todo{Cite Ruth's MSc thesis here}
+
+Since $P$ is a Monte Carlo approximation of the full covariance, small ensembles significantly
+\emph{undersample} the true statistics of the filter. This causes a variety of issues:
+\begin{itemize}
+    \item Spurious correlations between elements of the state vector (e.g. different
+    grid points in a discretisation of a domain) that represent unnatural or unphysical behaviour,
+    degrading the overall quality of the sample covariance.
+    \item Underestimate background covariance,
+    \item Filter inbreeding,
+    \item Filter divergence:
+    \item Full rank MCMC etc.
+\end{itemize}
+
+One of the most successful ensemble Kalman filter (EnKF) formulations is the local
+ensemble transform Kalman filter (LETKF) in which the impact of spurious analysis
+correlations is avoided by making use of local domain analyses. In this context, every
+model component is surrounded by a box of a prescribed radius, and then the
+assimilation is performed within every local box. In this case the background error
+correlations are provided by the local ensemble covariance matrix. The local analyses
+are mapped back onto the global domain to obtain the global analysis state.
+
+\section{Variants}
+
+\subsubsection{Square Root Filters}
+
+\todo{Nonuniqueness of sqrt filters?}
+
+% SQUARE ROOT HERE
+Deterministic forecasts also exist i.e. where Square-root filters do not compute
+\eqref{eq:enkf_forecasting} in practice. Instead,\\
+
+Square root filters rely on the observation that the root of the prior forecast matrix
+$\Pkpk$ can be decomposed:
+\[
+\Pkpk = L L'.
+\]
+Letting $D:=H_{k+1}\Pkpk H_{k+1}\transp + R_{k+1}$, then \eqref{eq:ForecastPosteriorSigma} 
+can be written as ...
+
+\subsubsection{Unscented Kalman Filter}
+
+\cite{julier1997new}
+
+\section{Variational Methods}
+
+\todo{Difference between Bayesian and variational methods}
+
+\subsection{Variational Kalman Filter (VKF)} 
+
+Was introduced in Auvinen et al (2009).\\
+
+There is also a smoothing variant: the Variational Kalman Smoother iterates VKF over the entire
+assimilation window but instead of observations it uses the
+analysis from the previous iteration cycle as the observations.
+
+\subsection{Variational Ensemble Kalman Filter (VEnKF)}
+
+Introduced first in Solonen (2012) 

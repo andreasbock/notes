@@ -1,0 +1,27 @@
+\section{Ensemble Kalman Inversion}
+
+While the standard EnKF is typically used as an inference tool it has also been proposed as a way to 
+solve general class inverse problems
+\cite{oliver2008inverse,iglesias2013ensemble,iglesias2016regularizing,chada2018parameterizations,schillings2017analysis}, supported by a wide array of numerical evidence in particular for data assimilation in atmospheric science (see e.g. \cite{schneider2017earth} and its bibliography). We briefly outline the steps of an iterative EnKF method for a Bayesian inverse problem roughly on the form \emph{given $y$, find the $x$ such that $y \approx H[x]$}, where $H$ now is a specified uncertainty-to-state operator. {The key in this approach is that the term $y - H \Xk$ in \eqref{ensembleupdate} now represents the misfit that we want to minimize (modulo possible added noise).
+\begin{itemize}
+    \item Denote by $X_0 = \{X_0^i\}_{i=1}^{N_E}$ the initial ensemble.
+    \item For $k=0,\ldots,n-1$:
+\begin{enumerate}
+    \item Propagate the ensemble through the uncertainty-to-state operator:
+    \begin{align} Y_k := \{Y_k^i\}_{i=1}^{N_E} = \{H[\Xk] + v_k^i\}_{i=1}^{N_E}, \quad v_i \in \mathcal{N}(0, R_k),\; i=1,\ldots,N_E.\label{eq:Yk}
+    \end{align}
+    \item Compute $K_{k+1}^E$ using $X_k$ and $Y^k$ in \eqref{enkf_approximations:X} and \eqref{enkf_approximations:COV}.
+    \item Update the ensemble: \[ X_{k+1} = X_k + K_{k+1}^E (y - Y^k),\] where these operations are understood element-wise across the ensemble.
+\end{enumerate}
+\end{itemize}
+}
+% Link with existing methods
+Under certain assumptions on the linearity of $H$ and the covariance operators $C$ and $R$ it can be shown \cite[Section 2.6]{iglesias2013ensemble} that the iterative EnKF approximates, without the use of derivatives, a solution to the Tikhonov-Philips \cite{vogel2002computational} regularised functional:
+\[
+x\mapsto \| y - H x \|_\mathcal{Y}^2 + \| x - \bar{x} \|_\mathcal{X}^2,
+\]
+where in this context $\bar{x}$ is the average of $x$.\\
+
+Next we show that the EnKF provides a massively parallel and derivative-free method for applications in shape analysis. We demonstrate the utility of this algorithm in the next section where we show numerical evidence of convergence and accuracy for landmark matching problems.
+
+    

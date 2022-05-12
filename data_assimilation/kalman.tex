@@ -1,0 +1,273 @@
+\section{The Kalman Filter}
+
+We are seeking to estimate a sequence of signal $x_t$, over some
+time interval with steps $\delta t$, by only observing points $y_t$ that are assumed
+to be in the range of some \emph{observation operator} plus added Gaussian noise.
+That is, for each time point we seek an estimate $\hat{x}_{t+\delta t}$ of 
+$x_{t+\delta t}$ provided cumulative information $y_t$. The (discrete time)
+Kalman filter provides an unbiased estimate, indeed it provides the
+\textbf{minimum variance unbiased estimator}:
+\[
+\hat{x}_{t+\delta t} := \arg\min_{x'} \expect{\|x' - x\|^2 \given y_t}.
+\]
+
+The Kalman filter results in closed form equations for $\hat{x}_{t+\delta t}$ based
+on some assumptions about the evolution of $x$ and the relationship between
+$x$ and $y$.
+
+\iffalse
+\begin{itemize}
+    \item Singular evolutive extended Kalman filter (SEEK)
+approximates the error covariance matrix by a singular low rank matrix, and makes correction only in those directions associated with the singular basis
+    \item adding control to \eqref{eq:state_and_observation_equations}?
+    \item filter inbreeding (P. Houtekamer and H. Mitchell. Data assimilation using an ensemble Kalman filter technique)
+    \item Local ensemble transform Kalman filter
+    \item 3D and 4D VaR
+    \item Extensions \& Nonlinear Filtering
+\end{itemize}
+
+In this section, we describe the Kalman filter \cite{kalman1960new}, a predictive 
+linear Gaussian filter whose the objective is generate a sequence of estimates of
+a Gaussian random variable given a sequence of measurements. 
+i.e. the posterior $\rho(X|Y)$ of a system i.e. the 
+probability of $X\in\mathcal{X}$ given $y\in\mathcal{Y}$, via Bayes' rule:
+\begin{equation}\label{bayesrule}
+\rho(X|Y) \propto \rho(X)\rho(Y|X),
+\end{equation}
+for some prior information $\rho(X)\sim \mathcal{N}(\mu, C)$ about a state $X$ and likelihood $\rho(Y|X)$ of a prediction $Y|X\in\mathcal{Y}$.
+\fi
+
+\subsection{Assumptions}
+
+We study the following linear system for $k=1,\ldots,K$:
+\begin{subequations}\label{eq:state_and_observation_equations}
+\begin{align}
+& \xkp = F_k \xk + w_k, & \text{(state evolution equation)}\label{eq:KalmanState}\\
+& y_k = H_k \xk + v_k, & \text{(observation or measurement equation)}\label{eq:KalmanMeasurement}
+\end{align}
+\end{subequations}
+\mymarginnote{When $F_k=I$ for all $k$, this is referred to as a \emph{random walk forecast 
+model.}}
+
+where:
+\begin{itemize}
+    \item $x\in\mathcal{X}$ are the states that we want to recursively estimate.
+    \item $F$ is a \emph{state transition model} (or \emph{state transition matrix} in finite dimension) applied to the previous state.
+    %\item $B$ is a \emph{control-to-state} model which is applied to the control.
+    \item $w\sim \mathcal{N}(0, Q_k)$ is process noise.
+    \item $y_k\in\mathcal{Y}$ is an observation.
+    \item $H:\mathcal{X}\rightarrow\mathcal{Y}$ is an \emph{observation} or \emph{measurement operator}.
+    \item $v_k\sim \mathcal{N}(0, R_k)$ is observational noise.
+\end{itemize}
+The Kalman filter is a Markovian state model i.e. $\{ x_k\}_k$ is a Markovian process. This means 
+the following assumptions hold for the mean zero noise variables:
+\begin{align}
+& \expect{w_k' w_l\transp} = Q_k \delta_{kl},\\
+& \expect{v_k' v_l\transp} = R_k \delta_{kl}.
+\end{align}
+In other words, the state space noise $\{ x_k\}_k$ is white i.e. they are independent across $k$, as
+well as having no correlation with the initial state, $x_0$. On top of that, we assume the following
+about the initial state:
+\begin{align}
+& \expect{x_0} = \hat{x}_{0|0},\\
+& \expect{(x_0-\hat{x}_{0|0})(x_0-\hat{x}_{0|0})\transp} = P_{0|0}.
+\end{align}
+\mymarginnote{Okay, get on with it!}
+Based on these assumptions, we know that the state $x_k$ is Gaussian owing to the linearity assumption.
+
+\subsection{Derivation}
+
+We choose our prediction of the state at time $k+1$ provided all the time $k$ information as:
+\begin{equation}\label{eq:hatxkpk_definition}
+\hatxkpk = \expect{\xkp\given Y_k} := \expect{\xkp\given\{ z_i\}_{i=0}^k},
+\end{equation}
+giving rise to recursive expressions as we expand $\xkp$ via k\eqref{eq:KalmanState}.\\
+
+The question is now: \textbf{how do update our prediction
+when new information becomes available?} That is, how do we compute $\hatxkpkp$?
+\mymarginnote{We don't want to forecast $k+2$ based on $\hatxkpk$ alone, we want to use
+$\ykp$, got it!} \textbf{The goal is to determine a prediction $\hatxkpkp$ of the state $\xkp$
+given information $Y_k := \{ y_i\}_{i=0}^k$ such that $\covariance{\hatxkpkp - \xkp}$ is minimised} 
+in the \emph{minimum mean square error} (MMSE) sense.\\
+
+Mathematically, we assume $\hatxkpkp = \pi (\hatxkpk, \ykp)$ for some $\pi$. We assume that $\pi$
+is linear and write it as:
+\begin{equation}\label{eq:hatxkpkp_MM_update}
+\hatxkpkp = M \hatxkpk + M' \ykp,
+\end{equation}
+for some linear $M$ and $M'$ (eliding the dependency on $k$ to ease the notation). Let us examine
+\eqref{eq:hatxkpkp_MM_update} and take its expectation (using \eqref{eq:KalmanMeasurement}):
+\mymarginnote{$\hatxkp$ and $\hatxkpk$ are sometimes called the \emph{forecast} and \emph{analysis}
+values of $x_{k+1}$.}
+\begin{align*}
+\expect{\hatxkpkp} & = \expect{M \hatxkpk + M' \ykp}\\
+& = \expect{M\hatxkpk + M'  H_{k+1} \xkp + v_{k+1}}\\
+& = \expect{M\hatxkpk + M'  H_{k+1} \xkp}\\
+& = M\expect{\hatxkpk} + M'  H_{k+1} \expect{\xkp}\\
+& = M\expect{\xkp} + M'  H_{k+1} \expect{\xkp},
+\end{align*}
+where the last equality holds by \eqref{eq:hatxkpk_definition}. Rewriting the expression
+above we get:
+\begin{equation}\label{eq:KalmanMMupdate_expectation}
+\expect{\hatxkpkp} = \Big(M + M'  H_{k+1}\Big) \expect{\xkp}.    
+\end{equation}
+If we want the correction made to our forecast $\hatxkpk$ via \eqref{eq:hatxkpkp_MM_update} to be  
+\emph{unbiased}, then the following equality \mymarginnote{We can't use $\xkp$ explicitly (because we don't have it), but
+we can reason with it!} must hold:
+\[
+\expect{\hatxkpkp} = \expect{\xkp}.
+\]
+as well as \eqref{eq:KalmanMMupdate_expectation}, which means:
+\[
+M + M'  H_{k+1} = I.
+\]
+Rearranging, letting $M'=K_{k+1}$ and inserting this into \eqref{eq:hatxkpkp_MM_update}, the 
+equation for $\hatxkpkp$ becomes:\mymarginnote{$K_{k+1}$ is called the \emph{Kalman gain}, and $\ykp - H_{k+1} \hatxkpk$ the \emph{innovation}.}
+\begin{equation}\label{eq:hatxkpkp_final}
+\hatxkpkp = \hatxkpk + K_{k+1} \big(\ykp - H_{k+1} \hatxkpk \big).
+\end{equation}
+\textbf{The question is now: how do you determine $K_{k+1}$?}. We can formulate the following
+optimisation problem:
+\begin{align*}
+& \min_{K_{k+1}} \covariance{\hatxkpkp - \xkp\given Z_{k+1}}\\
+= & \min_{K_{k+1}} \expect{(\hatxkpkp - \xkp)(\hatxkpkp - \xkp)\transp\given Z_{k+1}}\\
+= & \min_{K_{k+1}} \trace{(\hatxkpkp - \xkp)(\hatxkpkp - \xkp)\transp}\\
+= & \min_{K_{k+1}} \trace{\Pkpkp}\\
+= & \min_{K_{k+1}} L(K_{k+1}).
+\end{align*}
+
+First, let's compute $\Pkpk$ because we will need it later on:
+\begin{align}
+\Pkpk & = \covariance{\hatxkpk - x_{k+1}\given Y_k} \\
+& = \expect{(\hatxkpk - x_{k+1})(\hatxkpk - x_{k+1})\transp\given Y_k}\\
+& = F_k\covariance{\hatxkk - x_k}F_k\transp + Q_k\\
+& = F_k \Pkk F_k\transp + Q_k.
+\end{align}
+Next, computing the covariance matrix $\Pkpkp$ explicitly using \eqref{eq:hatxkpkp_final}:
+\begin{align}
+& \Pkpkp\\
+= & \covariance{\hatxkpkp - x_{k+1}}\\
+= & \covariance{\hatxkpk - x_{k+1} + K_{k+1}(\ykp - H_{k+1}\hatxkpk)}\\
+= & \covariance{(I - K_{k+1} H_{k+1})\hatxkpk - x_{k+1} + K_{k+1}(H_{k+1}\xkp + v_{k+1})}\\
+= & \covariance{(I - K_{k+1} H_{k+1})(\hatxkpk - x_{k+1}) + K_{k+1}v_{k+1}}\\
+= & (I - K_{k+1} H_{k+1})\covariance{\hatxkpk - x_{k+1}}(I - K_{k+1} H_{k+1})\transp + \covariance{ K_{k+1}v_{k+1}}\text{\mymarginnote{\eqref{eq:JosephForm} is called the \emph{Joseph form}
+of the update.}
+}\\
+= & (I - K_{k+1} H_{k+1})\Pkpk(I - K_{k+1} H_{k+1})\transp + K_{k+1}R_{k+1}K_{k+1}\transp.\label{eq:JosephForm}
+\end{align} 
+Equipped with this definition we inspect stationary points $\partial_K L = 0$ to finally 
+arrive at a definition of the Kalman gain at each iterate $k>0$:
+\begin{align*}
+\partial_K L|_{K_{k+1}}= -2 (I - K_{k+1} H_{k+1}) \Pkpk H_{k+1}\transp + 2K_{k+1}R_{k+1}\transp = 0.
+\end{align*}
+Rearranging this expression we get:
+\begin{equation}\label{eq:KalmanGain}
+K_{k+1} = \Pkpk H_{k+1}\transp\big[H_{k+1}\Pkpk H_{k+1}\transp + R_{k+1}\big]\inv,
+\end{equation}
+which along with \eqref{eq:hatxkpkp_final} are the main equations of the Kalman filter.
+\begin{remark}[Optimality]
+Since $K_{k+1}$ is the minimiser of $L$, it is in this sense that the Kalman filter is \emph{optimal}
+because it produces the state which minimises the mean squared error i.e. variance of the estimator.
+Note that this statement does not depend on whether $x_0$, $w_k$ or $v_k$ are Gaussian.
+\end{remark}
+Knowing the expression for the gain we can simplify the Joseph form error covariance update
+\eqref{eq:JosephForm}. Expanding this equation we get:
+\begin{align*}
+\Pkpkp & = \Pkpk - K_{k+1} H_{k+1}\Pkpk\\
+& - \Pkpk H_{k+1}\transp K_{k+1}\transp + 
+ K_{k+1}\big( H_{k+1}\Pkpk H_{k+1}\transp + R_{k+1})K_{k+1}\transp,
+\end{align*}
+and using \eqref{eq:KalmanGain} shows that the last two terms cancel, and we are left
+with the folowing expression for the posterior estimate covariance matrix:
+\begin{align}\label{eq:posterior_estimate_covariance}
+\Pkpkp & = \Pkpk - K_{k+1} H_{k+1}\Pkpk = (I - K_{k+1} H_{k+1})\Pkpk.
+\end{align}
+We can also obtain a nice formula for its inverse, $\Pkpkp$. Indeed, inserting the expression
+for the gain \eqref{eq:KalmanGain} in \eqref{eq:posterior_estimate_covariance}:
+\[
+\Pkpkp =  (I - \Pkpk H_{k+1}\transp\big[H_{k+1}\Pkpk H_{k+1}\transp + 
+R_{k+1}\big]\inv H_{k+1})\Pkpk,
+\]
+and then using the Sherman-Woodbury-Morrison (SWM) identity:
+\[
+\Pkpkp = \big[\Pkpk\inv + H_{k+1}\transp R_{k+1}\inv H_{k+1}\big]\inv.
+\]
+By noting that $K_{k+1} = (\Pkpk - K_{k+1} H_{k+1} \Pkpk) H_{k+1} R_{k+1}\inv$ we can write 
+\eqref{eq:hatxkpkp_final} in terms of $\Pkpkp$ (see also \cite{evensen2003ensemble,nino2015efficient}):
+\begin{align*}
+\hatxkpkp
+& = \hatxkpk + K_{k+1} \big(\ykp - H_{k+1} \hatxkpk \big)\\
+& = \hatxkpk - K_{k+1} H_{k+1} \hatxkpk + K_{k+1} \ykp\\
+& = \hatxkpk - K_{k+1} H_{k+1} \hatxkpk + (\Pkpk - K_{k+1} H_{k+1} \Pkpk) H_{k+1} R_{k+1}\inv\ykp\\
+& = (\Pkpk - K_{k+1} H_{k+1}\Pkpk)(\Pkpk\inv\hatxkpk + H_{k+1} R_{k+1}\inv\ykp)\\
+& = (\Pkpk - \Pkpk H_{k+1}\transp\big[H_{k+1}\Pkpk H_{k+1}\transp + R_{k+1}\big]\inv H_{k+1}\Pkpk)\\
+& \quad (\Pkpk\inv\hatxkpk + H_{k+1} R_{k+1}\inv\ykp)\\
+& = \Pkpkp(\Pkpk\inv\hatxkpk + H_{k+1} R_{k+1}\inv\ykp).\qquad\quad \text{(SWM identity)}
+\end{align*}
+We have therefore demonstrated that we can write the update equations for the mean and covariance as:
+\begin{align}
+& \hatxkpkp = \Pkpkp(\Pkpk\inv\hatxkpk + H_{k+1}\transp R_{k+1}\inv\ykp)\\
+& \Pkpkp\inv = \Pkpk\inv + H_{k+1}\transp R_{k+1}\inv H_{k+1} \label{eq:ForecastPosteriorSigma}.
+\end{align}
+
+\begin{algorithm}
+\caption{Kalman Filter}\label{alg:kalman_filter}
+\begin{algorithmic}
+\Require $n \geq 0$
+\Ensure $y = x^n$
+\State $y \gets 1$
+\State $X \gets x$
+\State $N \gets n$
+\While{$N \neq 0$}
+spot\If{$N$ is even}
+    \State $X \gets X \times X$
+    \State $N \gets \frac{N}{2}$  \Comment{This is a comment}
+\ElsIf{$N$ is odd}
+    \State $y \gets y \times X$
+    \State $N \gets N - 1$
+\EndIf
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+\begin{question}
+What is the computational complexity of the Kalman filter (per iteration)?
+\end{question}
+\begin{answer}
+Recall that the state vector has dimension $n$ and the observation space has dimension $m$.
+Owing to the presence of matrix multiplication and inverses, the most na\"ive complexity of
+algorithm \ref{alg:kalman_filter} is $O(m^3 + n^3)$.
+See also \cite{saibaba2015fast}.
+\end{answer}
+
+The forecast covariance, $\Pkpk$, is typically unknown and must be estimated from the forecast
+itself. However, if the dimension $n$ of the (unobserved) state or $m$ of the observations is very
+large, then the inverses of $\Pkpk$ (of size $n\times n$) or the $m\times m$ inverse matrix
+in \eqref{eq:KalmanGain} become costly. 
+
+\begin{example}[Pendulum tracking]
+For instance, think of a pendulum and how the observations are in 2D, but the state contains
+approximations of higher order moments like derivatives in addition to it. As you keep adding Taylor
+terms, the dimension of the state increases.
+\end{example}
+
+\subsection{Shortcomings}\label{sec:shortcomings_and_overview}
+
+The success of the Kalman filter has motivated numerous extensions seeking to overcome
+some of the shortcomings that the assumptions of the Kalman filter rely on. The two
+principal concerns that these extensions try to overcome are scalability and linearity.\\
+
+\textbf{High dimensionality}\\
+The cubic scaling in $n$ is prohibitive when performing data assimilation for high-dimensional
+systems. As we shall see in the next section, an \emph{ensemble} can be maintained that reduces
+this scaling at the cost of some inaccuracies in the estimation. Furthermore, the scaling in $m$ can
+also be remedied by diligent use of matrix identities, reducing the scaling to $n + m$ times a
+quadratic term in the dimension of the so-called ensemble approximation.\\
+
+\textbf{Linearity}\\
+Second, the assumption that the state and observation operators are linear are not valid for
+many real applications e.g. numerical weather prediction (NWP). There are linearisation procedures
+and other avenues that have been explored in order to - rather successfully - apply the Kalman
+filter idea to nonlinear systems.\\
+
+The EKF just linearises nonlinear forward maps.

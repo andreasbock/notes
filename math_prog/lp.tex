@@ -1,0 +1,47 @@
+\section{Linear Programming}
+
+This chapter covers the basics of linear programming. For anyone who has already
+studied linear programming note that I do not present it using tableaus.
+
+\subsection{Motivation}
+
+In the context of mathematics, "programming" and optimization are interchangeable.
+Linear programming is concerned with maximizing functions that are linear in its
+variables.\\
+
+Linear programming has many applications in real life, so a small example will
+serve as motivation.
+
+Say you were a farmer with $100 \text{m}^2$ of land, 10 buckets of wheat grain
+and 20 buckets of rye, along with 100L of irrigation water. This begs the question;
+how much wheat and rye should you plant to maximize your profits?
+
+To answer the question, we require more information. How much water does it take
+to grow wheat and rye? Assuming the answer is 10L/m$^2$ and 7L/m$^2$  respectively, we can
+write the corresponding linear program as:
+
+% TODO: Insert example mathematics
+\begin{align}
+\label{twoindex}
+\textrm{min}\quad  \sum_{i=1}^n \sum_{j=1}^n c_{ij}x_{ij} & & \\
+\textrm{s.t.}\quad \sum_{i=1, i\neq j}^n x_{ij} & =& 1,\hspace{0.5cm}\forall j\in V \label{twoindexarrive}\\
+\quad \sum_{j=1, j\neq i}^n x_{ij} & =& 1, \hspace{0.5cm} \forall i\in V \label{twoindexleave}\\
+\quad \sum_{(i,j) \in S}^n x_{ij} & \leq& |S| - 1, \hspace{0.5cm} \forall S\subset V, \hspace{0.25cm} 2\leq |S| \leq n \label{twoindexsec}\\
+x_{ij}& \in & \{ 0, 1\} 
+\end{align}
+
+The solution to the farmer's problem is x somevector, and in the following section we
+will see how the result was obtained. 
+
+\subsection{Simplex}
+
+In this section I present the \simplex algorithm (or method). It was orignally developed by
+Dantzig in 1947 (need reference).
+
+Finally, for my fellow computer scientists and other people interested in
+functional programming, I have implemented \simplex in Haskell which you
+can access by visiting \href{http://github.com/andreasbock/simplex}{\tt http://github.com/andreasbock/simplex}.
+
+\subsection{Duality}\label{sec:duality}
+
+\subsubsection{Duality gap}

@@ -1,0 +1,77 @@
+\chapter{Mathematical Programming}
+\localtableofcontents
+
+This document is a result of my pursuits in OR. During my
+Bachelor's and Master's studies I have grown fond of operations research, more
+specifically linear, integer and stochastic programming. Over the last few years
+I have accumulated pile on notes that I thought I would digitalize and share
+them with anyone who \st{cares} wants to use them.\\
+
+\section{Language}
+
+These notes were written when I was a student, so if you are looking for a very
+dense text on operations research I recommend looking through the references.
+I adopt a very informal tone in these notes which I think reflects the fact that
+they were written as an inquisitve soul who did not yet have the insight
+required to quickly graps very complex defitions and proofs by merely skimming
+a couple of lines of text.\\
+
+\section{Background}
+
+%I am a computer scientist, and since I'm writing a text on mathematics I would
+%like to emphasize this. I am a \textit{computer scientist}. This may invovle me
+%leaving out some of the intricacies of mathematics (e.g. "yes, I STILL
+%mean $\forall i,j \in V$..."), but hopefully nothing too serious
+%(e.g. "Sure, a partition can be empty!")\footnote{Need proof of this, read up on
+%topolofy"}.\\
+
+These notes should help you in understanding operations research
+through the eyes of your peer, and hopefully you will think it fun. Bear over
+with my tongue-in-cheek writing style and I am sure you can get something out
+of it. If not, enjoy the {\LaTeX  } formatting, which is something every
+can appreciate.\\
+
+For anyone at the University of Copenhagen with an interest in OR I can 
+recommend the following courses:
+
+\begin{description}
+\item[\href{http://kurser.ku.dk/course/nmaa05087u/2013-2014}{Operations Research 1}]
+\hfill\\ Introduction to OR, mainly linear programming.
+\item[\href{http://kurser.ku.dk/course/nmaa09044u/2013-2014}{Operations Research 2}] 
+\hfill\\ Integer programming, complexity considerations
+and heuristics.
+\item[\href{http://kurser.ku.dk/course/nmak13015u/2013-2014}{Modelling and GAMS}
+\footnote{I have not taken this course but it has been recommended to me.}]
+\hfill\\ (guess what this one is about).
+\item[\href{http://kurser.ku.dk/course/nmaa13028u/2013-2014}{Stochastic Programming}]
+\hfill\\ (guess what this one is about).
+\item[\href{http://kurser.ku.dk/course/ndaa09023u/2013-2014}
+{Advanced Algorithms and Data Structures}]
+\hfill\\ A great course at DIKU covering
+ a plethora of interesting stuff like max flow, \np-completeness, FTP,
+ heuristics and randomized algorithms.
+\end{description}
+
+
+{\emph{Non-anticipativity}}{The decision $x_t$, chosen at stage $t$, may depend on the information 
+$\xi_{[t]}$, but not on future observations. Equation \ref{eq:nonanti} shows how this is enforced
+in the multi-stage case.}
+
+{\emph{Fixed recourse}}{The $\bm{W}$ matrix does not depend on the realization of $\xi$.}
+
+{\emph{Simple recourse}}{Something}
+
+{\emph{Relatively Complete Recourse}}{$K_1 \subset K_2$, so $\mathcal{Q}(x,\xi)$ will never
+attain the value $\infty$. In other words, we can always find a feasible second-stage solution
+regardless of what choice we make in the first stage.}
+
+{\emph{Complete Recourse}}{$\forall x \in \mathcal{X},\; \exists y \in \mathcal{R}^{n_2} : Wy = z$.
+This is a property of $W$, which basically states that if the columns of $W$ span $\mathcal{R}^{n_2}$,
+complete recourse applies. It means that we can always find a $y$ regardless of our first-stage
+decision. Typically, adding $\big[I, -I\big]$ is sufficienient.}
+
+
+\input{math_prog/lp}
+\input{math_prog/ip}
+\input{math_prog/sp}
+\input{math_prog/hier}

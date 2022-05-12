@@ -1,0 +1,137 @@
+
+% Theorems
+\newtheorem{thm}{Theorem}
+\newtheorem{mydef}{Definition}
+
+% Font
+\renewcommand*\rmdefault{ppl}
+\renewcommand*{\marginfont}{\footnotesize}
+
+% References & Nomenclature
+\addto{\captionsenglish}{%
+  \renewcommand{\bibname}{References}
+  }
+\renewcommand{\nomname}{Definitions and Nomenclature}
+\makenomenclature
+% ---------------------------------------------
+% Theorems & Environments
+% ---------------------------------------------
+\newcounter{mythm}
+\newcounter{mylem}
+\newcounter{myrem}
+\newcounter{myexa}
+\newcounter{mypro}
+\newcounter{mycol}
+\newcounter{myass}
+\newcounter{mysketch}
+\newtheorem{theorem}[mythm]{Theorem}
+\newtheorem{definition}[mydef]{Definition}
+\newtheorem{remark}[myrem]{Remark}
+\newtheorem{lemma}[mylem]{Lemma}
+\newtheorem{example}[myexa]{Example}
+\newtheorem{proposition}[mypro]{Proposition}
+\newtheorem{corollary}[mycol]{Corollary}
+\newtheorem{assumption}[myass]{Assumption}
+\newtheorem{sketch}[mysketch]{Proof Sketch}
+% Question & answers environment
+\newcounter{question}[section]
+\newenvironment{question}[1][]{\refstepcounter{question}\par\medskip
+   \noindent \textbf{Question ~\thequestion. #1} \rmfamily}{\medskip}
+\newenvironment{answer}{\par\medskip \itshape \paragraph{Answer to question ~\thequestion:}}{\hfill$\square$\medskip}
+\newenvironment{research}{\itshape\color{purple}}{\medskip}
+
+\newcommand{\andreas}[1]{{\itshape\color{purple} #1 }}
+\newcommand{\mymarginnote}[1]{\marginnote{\itshape\color{olive} #1 }}
+\newcommand{\todo}[1]{\textcolor{red}{\textit{ #1 }}}
+%\newenvironment{komment}{\itshape Comment: }{\hfill$\clubsuit$}
+%\newcommand{\komment}[1]{\begin{tcolorbox} \itshape Comment: \\
+% #1 \end{tcolorbox}}
+
+% Shorthands
+\newcommand{\np}{$ \mathcal{NP} $}
+\newcommand{\comm}[2]{{\sf \(\spadesuit\){\bf #1: }{\rm \sf #2}\(\spadesuit\)}}
+\newcommand{\mcomm}[2]{\marginpar{\scriptsize \comm{#1}{#2}}}
+\newcommand{\ab}[1]{\mcomm{AB}{#1}}
+\newcommand{\simplex}{\textsc{Simplex} }
+\newcommand{\Q}{\mathcal{Q} }
+\newcommand{\Exp}[1]{\mathbb{E}\big[ #1 \big]}
+\newcommand{\mL}{\mathcal{L} }
+\newcommand{\bq}{\bm{q}}
+\newcommand{\by}{\bm{y}}
+\newcommand{\bx}{\bm{x}}
+\newcommand{\bh}{\bm{h}}
+\newcommand{\bW}{\bm{W}}
+\newcommand{\bT}{\bm{T}}
+\newcommand{\bX}{\bm{X}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Rm}{\mathbb{R}^m}
+\newcommand{\half}{\frac{1}{2}}
+\newcommand{\prob}[1]{\mathcal{P}\big[ #1 \big]}
+\newcommand{\stone}{\underline{\emph{\bf Stage 1:}}}
+\newcommand{\obs}{\underline{\emph{\bf Observe:}}}
+\newcommand{\sttwo}{\underline{\emph{\bf Stage 2:}}}
+\newcommand{\form}{\underline{\emph{\bf Formulate:}}}
+
+\newcommand{\expect}[1]{\mathds{E}\big[ #1 \big]}
+\newcommand{\covariance}[1]{\mathds{V}\big[ #1 \big]}
+
+\newcommand{\cm}{\textsuperscript{\textcolor{red}{[Citation Missing]}}}
+\newcommand{\transp}{^\top}
+\newcommand{\invtransp}{^{-\top}}
+\newcommand{\inv}{^{-1}}
+\newcommand{\KL}[2]{\text{KL}{(#1, #2)}}
+\newcommand{\statman}{\mathcal{H}}
+\newcommand{\given}{\,|\,}
+\newcommand{\trace}[1]{\textnormal{trace}\Big[ #1 \Big]}
+
+% Inverse problems
+\newcommand{\zk}{z_k}
+\newcommand{\zkp}{z_{k+1}}
+\newcommand{\zkpk}{z_{k+1|k}}
+\newcommand{\zkpkp}{z_{k+1|k+1}}
+
+\newcommand{\xk}{x_k}
+\newcommand{\xkp}{x_{k+1}}
+\newcommand{\xkpk}{x_{k+1|k}}
+\newcommand{\xkpkp}{x_{k+1|k+1}}
+
+\newcommand{\Xk}{X_k}
+\newcommand{\Xkp}{X_{k+1}}
+\newcommand{\Xkpk}{X_{k+1|k}}
+\newcommand{\Xkpkp}{X_{k+1|k+1}}
+
+\newcommand{\yk}{y_k}
+\newcommand{\ykp}{y_{k+1}}
+\newcommand{\ykpk}{y_{k+1|k}}
+\newcommand{\ykpkp}{y_{k+1|k+1}}
+
+\newcommand{\barXk}{\bar{X}_k}
+\newcommand{\barXkp}{\bar{X}_{k+1}}
+\newcommand{\barXkk}{\bar{X}_{k|k}}
+\newcommand{\barXkpk}{\bar{X}_{k+1|k}}
+\newcommand{\barXkpkp}{\bar{X}_{k+1|k+1}}
+
+\newcommand{\hatXk}{\hat{X}_k}
+\newcommand{\hatXkp}{\hat{X}_{k+1}}
+\newcommand{\hatXkk}{\hat{X}_{k|k}}
+\newcommand{\hatXkpk}{\hat{X}_{k+1|k}}
+\newcommand{\hatXkpkp}{\hat{X}_{k+1|k+1}}
+
+\newcommand{\hatxk}{\hat{x}_k}
+\newcommand{\hatxkp}{\hat{x}_{k+1}}
+\newcommand{\hatxkk}{\hat{x}_{k|k}}
+\newcommand{\hatxkpk}{\hat{x}_{k+1|k}}
+\newcommand{\hatxkpkp}{\hat{x}_{k+1|k+1}}
+
+\newcommand{\Pkk}{P_{k|k}}
+\newcommand{\Pkpk}{P_{k+1|k}}
+\newcommand{\Pkpkp}{P_{k+1|k+1}}
+
+
+\newcommand{\boldPkk}{\bm{P}_{k|k}}
+\newcommand{\boldPkpk}{\bm{P}_{k+1|k}}
+\newcommand{\boldPkpkp}{\bm{P}_{k+1|k+1}}
+
+\newcommand{\ePkk}{P^E_{k|k}}
+\newcommand{\ePkpk}{P^E_{k+1|k}}
+\newcommand{\ePkpkp}{P^E_{k+1|k+1}}
