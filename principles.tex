@@ -1,0 +1,42 @@
+\chapter{Principles}
+
+\section{Notation}
+
+A hat e.g. $\hat{x}$ means that this variable or data has some 
+empirical nature or origin.
+
+\section{What To Do About Training Data}
+
+Typically all we have when we approach a problem that has some
+statistical foundation is a finite collection of samples, say
+$\hat{\xi}_i$, $i=1,\ldots,N$. These imply an empirical measure under some
+assumption of their distribution.
+
+\section{Maximum Likelihood Estimation}
+
+Upon assuming some Gaussian data, we write the log-likehood
+as follows:
+\begin{align}
+\hat{\mathcal{L}}(\mu, \Sigma\inv) & = -\frac{nN}{2}\log(2\pi)
++ \frac N2\log\det(\Sigma\inv) - \frac 12 \sum_{i=1}^N (\hat{\xi}_i - \mu)\transp\Sigma\inv (\hat{\xi}_i - \mu)\nonumber\\
+& = -\frac{nN}{2}\log(2\pi)
++ \frac N2\log\det(\Sigma\inv)
+- \trace{\hat{\Sigma}\Theta} - 
+\frac 12  (\hat{\mu} - \mu)\transp\Sigma\inv (\hat{\mu} - \mu)
+\label{eq:gaussian_log-likelihood}
+\end{align}
+
+The \emph{maximum likelihood estimator} $\Theta$ of the precision 
+is given by:
+\begin{align}
+\Theta & = \arg\min_{\Theta\in\PD} \hat{\mathcal{L}}(\mu, \Theta)\nonumber\\
+ & = \arg\min_{\Theta\in\PD} -\log\det(\Theta)
+ + \trace{\hat{\Sigma} \Theta}.\label{eq:gaussian_log-likelihood:empirical}
+\end{align}
+
+The problem above is unbounded when $n>N$, since the SVD of the
+sample covariance will decay to zero for some $i<n$, we can set
+$\Theta$'s $i$\textsuperscript{th} singular value (indeed, its $i$ 
+to $n$\textsuperscript{th}) to some $k>0$ and construct some
+sequence of $k$'s such that 
+\eqref{eq:gaussian_log-likelihood:empirical} is unbounded.

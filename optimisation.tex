@@ -1,7 +1,50 @@
 \chapter{Numerical Optimisation}
 \localtableofcontents
 
+\section{Wolfe Conditions}
+
+Wolfe conditions relate to inexact line search methods i.e.
+where you solve a subproblem on the form:
+\[
+\min_\alpha f(x_k + \alpha p_k),
+\]
+where $p_k$ is a search direction. The inexact line searches provide
+an efficient way of computing an acceptable step length $\alpha$.
+The Wolfe conditions are a set of inequalities that tell us whether
+the chosen step size:
+\begin{enumerate}
+    \item Still provides a descent direction,
+    \item the descent direction has reduced the slope sufficiently.
+\end{enumerate}
+
 \section{Interior Point Methods}
+
+Interior point methods are widely used for nonlinear programs.\\
+
+Interior point methods approximates the constraints of a linear
+programming model as a set of boundaries surrounding a region.
+These approximations are used when the problem has constraints
+that are discontinuous or otherwise troublesome, but can me
+modified so that a linear solver can handle them. 
+
+Two practical algorithms exist in IP method: barrier and
+primal-dual.
+
+\subsection{Barrier Approach}
+
+This refers to the reformulation of an NLP to a Lagrangian,
+and to fix the "barriers" i.e. penalty on the Lagrange terms 
+being non-zero and solve for the primal variable. The common
+example is a $\log$ barrier.
+
+We then derive the KKT condition. Newton's
+method is used to iteratively approach more and more optimal
+solutions within the feasible region.\\
+
+\subsection{Primal-dual Method}
+Primal-dual method is a more promising way to solve
+larger problems with more efficiency and accuracy.
+
 
 \section{Trust Region Method}
 

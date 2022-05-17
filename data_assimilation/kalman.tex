@@ -5,7 +5,7 @@ time interval with steps $\delta t$, by only observing points $y_t$ that are ass
 to be in the range of some \emph{observation operator} plus added Gaussian noise.
 That is, for each time point we seek an estimate $\hat{x}_{t+\delta t}$ of 
 $x_{t+\delta t}$ provided cumulative information $y_t$. The (discrete time)
-Kalman filter provides an unbiased estimate, indeed it provides the
+Kalman filter \cite{kalman1960new} provides an unbiased estimate, indeed it provides the
 \textbf{minimum variance unbiased estimator}:
 \[
 \hat{x}_{t+\delta t} := \arg\min_{x'} \expect{\|x' - x\|^2 \given y_t}.
