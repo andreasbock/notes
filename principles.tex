@@ -17,11 +17,12 @@ assumption of their distribution.
 Upon assuming some Gaussian data, we write the log-likehood
 as follows:
 \begin{align}
-\hat{\mathcal{L}}(\mu, \Sigma\inv) & = -\frac{nN}{2}\log(2\pi)
+\hat{\mathcal{L}}(\mu, \Sigma\inv) & = \log\Pi_{i=1}^N f(x_i\given \mu, \Sigma)\\
+& = -\frac{nN}{2}\log(2\pi)
 + \frac N2\log\det(\Sigma\inv) - \frac 12 \sum_{i=1}^N (\hat{\xi}_i - \mu)\transp\Sigma\inv (\hat{\xi}_i - \mu)\nonumber\\
 & = -\frac{nN}{2}\log(2\pi)
 + \frac N2\log\det(\Sigma\inv)
-- \trace{\hat{\Sigma}\Theta} - 
+- \trace{\hat{\Sigma}\Theta} -      
 \frac 12  (\hat{\mu} - \mu)\transp\Sigma\inv (\hat{\mu} - \mu)
 \label{eq:gaussian_log-likelihood}
 \end{align}
